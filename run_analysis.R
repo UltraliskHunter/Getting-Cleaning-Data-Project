@@ -31,11 +31,11 @@ label_train <- read.table(
         "~/R/RFiles/3GettingCleaning/project/UCI HAR Dataset/train/Y_train.txt",
         header=F, sep=" ", stringsAsFactors = F)
 
-#merge test and training vectors
+#merge test and training data
 subject <- c(subject_train, subject_test, recursive=T)
 set <- rbind(set_train, set_test)
 label <- c(label_train, label_test, recursive=T)
-#bind vectors into a single table
+#bind data into a single table
 merged <- cbind(data.frame(subject=subject, condition=label), movement.data=set)
 
 ##read features.txt data
@@ -43,12 +43,11 @@ features <- read.table(
         "~/R/RFiles/3GettingCleaning/project/UCI HAR Dataset/features.txt",
         header=F, sep=" ", colClasses="character")
 
-##grep to find mean and sum values in "features"
-##list their column number
-##shift their column number by 2 (makes "features" col#'s = "merged" col#'s)
+##grep to find mean and sum values in "features" and list their column numbers
+##shift their column number up by 2 (makes "features" col #'s = "merged" col #'s)
 greplist<- grep("mean[(]|std[(]", features[,2], ignore.case=F, value=F)
 listshift <- greplist + 2
-##subset columns (#1 & #2 are subject and activity labels)
+##subset columns (#1 & #2 are the subject and activity labels)
 merged_cut <- merged[, c(1, 2, listshift)]
 
 ##re-label condition according to activity_labels.txt
@@ -64,13 +63,13 @@ varnames<- grep("mean[(]|std[(]", features[,2], ignore.case=F, value=T)
 ##transform to a comma separated list of characters with paste()
 ##use colnames() to set variable names
 varlist <- paste(varnames, sep=",")
-colnames(merged_cut) <- c("subject", "condition", varlist)
+colnames(merged_cut) <- c("subject", "activity", varlist)
 
 ##melt data frame
 library(reshape2)
-mergecutmelt <- melt(merged_cut, id=c("subject", "condition"), measure.vars=c(varlist))
+mergecutmelt <- melt(merged_cut, id=c("subject", "activity"), measure.vars=c(varlist))
 ##cast by subject and condition for variable mean
-mergecutcast <- dcast(mergecutmelt, subject + condition ~ variable, mean)
+mergecutcast <- dcast(mergecutmelt, subject + activity ~ variable, mean)
 
 ##save merged_cut and mergecutcast as txt files
 write.table(merged_cut, file="tidydata1.txt")
